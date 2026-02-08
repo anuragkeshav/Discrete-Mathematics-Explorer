@@ -1,0 +1,2585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discrete Mathematics Explorer: Functions & Advanced Set Theory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        :root {
+            --neon-cyan: #00f3ff;
+            --neon-purple: #bc13fe;
+            --neon-pink: #ff006e;
+            --neon-green: #00ff9d;
+            --neon-orange: #ff9500;
+            --neon-yellow: #fbbf24;
+            --dark-bg: #0a0a0f;
+            --panel-bg: rgba(20, 20, 30, 0.8);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        
+        .neon-text {
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        }
+        
+        .topic-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        
+        .topic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 243, 255, 0.2);
+            border-color: var(--neon-cyan);
+        }
+        
+        .topic-card.active {
+            border-color: var(--neon-cyan);
+            background: rgba(0, 243, 255, 0.1);
+        }
+        
+        .venn-circle {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .venn-circle:hover {
+            filter: brightness(1.2);
+        }
+        
+        .grid-bg {
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        
+        .relation-node {
+            transition: all 0.3s ease;
+        }
+        
+        .relation-edge {
+            stroke-dasharray: 5;
+            animation: dash 20s linear infinite;
+        }
+        
+        @keyframes dash {
+            to { stroke-dashoffset: -100; }
+        }
+        
+        .math-symbol {
+            font-size: 1.2em;
+            color: var(--neon-cyan);
+        }
+        
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--neon-cyan);
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+        
+        .hasse-line {
+            stroke: var(--neon-purple);
+            stroke-width: 2;
+            transition: all 0.3s;
+        }
+        
+        .hasse-node {
+            fill: var(--panel-bg);
+            stroke: var(--neon-cyan);
+            stroke-width: 2;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .hasse-node:hover {
+            fill: var(--neon-cyan);
+            transform: scale(1.2);
+        }
+        
+        .equivalence-class {
+            transition: all 0.5s ease;
+        }
+        
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        .infinity-symbol {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        
+        .cardinal-comparison {
+            transition: all 0.3s ease;
+        }
+        
+        .cardinal-comparison:hover {
+            transform: scale(1.05);
+            background: rgba(188, 19, 254, 0.2);
+        }
+        
+        .function-curve {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawCurve 2s ease forwards;
+        }
+        
+        @keyframes drawCurve {
+            to { stroke-dashoffset: 0; }
+        }
+        
+        .bijection-line {
+            stroke: var(--neon-green);
+            stroke-width: 2;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 0.6; }
+        }
+        
+        .diagonal-cell {
+            transition: all 0.3s ease;
+        }
+        
+        .diagonal-cell.highlight {
+            background: var(--neon-pink);
+            transform: scale(1.1);
+        }
+        
+        .power-set-node {
+            transition: all 0.4s ease;
+        }
+        
+        .power-set-node:hover {
+            filter: drop-shadow(0 0 10px var(--neon-cyan));
+        }
+        
+        .sbt-compare {
+            transition: all 0.3s ease;
+        }
+        
+        .sbt-compare:hover {
+            background: rgba(0, 243, 255, 0.1);
+        }
+        
+        .function-type-card {
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .function-type-card:hover {
+            border-color: var(--neon-cyan);
+            transform: translateX(10px);
+        }
+        
+        .function-type-card.active {
+            background: rgba(0, 243, 255, 0.1);
+            border-color: var(--neon-cyan);
+        }
+        
+        .composite-step {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: stepIn 0.5s ease forwards;
+        }
+        
+        @keyframes stepIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .countable-list {
+            counter-reset: item;
+        }
+        
+        .countable-item::before {
+            counter-increment: item;
+            content: counter(item) ". ";
+            color: var(--neon-cyan);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="grid-bg min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-panel border-b border-cyan-500/20">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl">
+                    ƒ
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight">
+                    <span class="text-cyan-400">Discrete</span> Math <span class="text-purple-400">Explorer</span>
+                </h1>
+            </div>
+            <div class="hidden md:flex gap-6 text-sm font-medium">
+                <button onclick="scrollToSection('sets')" class="hover:text-cyan-400 transition-colors">Sets</button>
+                <button onclick="scrollToSection('relations')" class="hover:text-cyan-400 transition-colors">Relations</button>
+                <button onclick="scrollToSection('functions')" class="hover:text-cyan-400 transition-colors">Functions</button>
+                <button onclick="scrollToSection('cardinality')" class="hover:text-cyan-400 transition-colors">Cardinality</button>
+                <button onclick="scrollToSection('advanced')" class="hover:text-cyan-400 transition-colors">Advanced</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-4 relative overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <div id="hero-canvas" class="w-full h-full opacity-30"></div>
+        </div>
+        <div class="max-w-6xl mx-auto relative z-10 text-center">
+            <h2 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                Master <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">Functions</span><br>
+                <span class="text-3xl md:text-5xl text-gray-400">& Advanced Set Theory</span>
+            </h2>
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-12">
+                Explore bijections, compositions, and Cantor's theorems through interactive visualization. 
+                From function types to uncountable infinities.
+            </p>
+            
+            <!-- Topic Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-6xl mx-auto">
+                <!-- Original Topics -->
+                <div class="topic-card glass-panel rounded-xl p-4 border border-white/10" onclick="activateTopic(0)">
+                    <div class="text-2xl mb-1">∪ ∩</div>
+                    <div class="font-bold text-cyan-400 text-sm">Set Operations</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-white/10" onclick="activateTopic(1)">
+                    <div class="text-2xl mb-1">×</div>
+                    <div class="font-bold text-purple-400 text-sm">Cartesian Product</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-white/10" onclick="activateTopic(2)">
+                    <div class="text-2xl mb-1">R</div>
+                    <div class="font-bold text-pink-400 text-sm">Binary Relations</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-white/10" onclick="activateTopic(3)">
+                    <div class="text-2xl mb-1">≤</div>
+                    <div class="font-bold text-yellow-400 text-sm">Partial Order</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-white/10" onclick="activateTopic(4)">
+                    <div class="text-2xl mb-1">≡</div>
+                    <div class="font-bold text-green-400 text-sm">Equivalence</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-white/10" onclick="activateTopic(5)">
+                    <div class="text-2xl mb-1">f(A)</div>
+                    <div class="font-bold text-orange-400 text-sm">Image of Set</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-white/10" onclick="activateTopic(6)">
+                    <div class="text-2xl mb-1">|A|</div>
+                    <div class="font-bold text-red-400 text-sm">Cardinality</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-white/10" onclick="activateTopic(7)">
+                    <div class="text-2xl mb-1 infinity-symbol">∞</div>
+                    <div class="font-bold text-indigo-400 text-sm">Infinite Sets</div>
+                </div>
+                <!-- New Function Topics -->
+                <div class="topic-card glass-panel rounded-xl p-4 border border-cyan-500/30" onclick="activateTopic(8)">
+                    <div class="text-2xl mb-1">ƒ: X→Y</div>
+                    <div class="font-bold text-cyan-400 text-sm">Functions & Types</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-purple-500/30" onclick="activateTopic(9)">
+                    <div class="text-2xl mb-1">ƒ+g</div>
+                    <div class="font-bold text-purple-400 text-sm">Sum & Product</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-green-500/30" onclick="activateTopic(10)">
+                    <div class="text-2xl mb-1">↔</div>
+                    <div class="font-bold text-green-400 text-sm">Bijective</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-pink-500/30" onclick="activateTopic(11)">
+                    <div class="text-2xl mb-1">ƒ⁻¹</div>
+                    <div class="font-bold text-pink-400 text-sm">Inverse Function</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-yellow-500/30" onclick="activateTopic(12)">
+                    <div class="text-2xl mb-1">ƒ∘g</div>
+                    <div class="font-bold text-yellow-400 text-sm">Composite</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-orange-500/30" onclick="activateTopic(13)">
+                    <div class="text-2xl mb-1">ℵ₀</div>
+                    <div class="font-bold text-orange-400 text-sm">Countable Sets</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-red-500/30" onclick="activateTopic(14)">
+                    <div class="text-2xl mb-1">ℝ</div>
+                    <div class="font-bold text-red-400 text-sm">Uncountable</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-indigo-500/30" onclick="activateTopic(15)">
+                    <div class="text-2xl mb-1">D</div>
+                    <div class="font-bold text-indigo-400 text-sm">Cantor's Diagonal</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-cyan-500/30" onclick="activateTopic(16)">
+                    <div class="text-2xl mb-1">2^S</div>
+                    <div class="font-bold text-cyan-400 text-sm">Power Set</div>
+                </div>
+                <div class="topic-card glass-panel rounded-xl p-4 border border-purple-500/30" onclick="activateTopic(17)">
+                    <div class="text-2xl mb-1">|A|=|B|</div>
+                    <div class="font-bold text-purple-400 text-sm">Schröder-Bernstein</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 pb-20 space-y-8">
+
+        <!-- 1. Set Operations -->
+        <section id="topic-0" class="topic-section glass-panel rounded-2xl p-8 border border-cyan-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center text-2xl">∪</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-cyan-400">1. Operations and Laws of Sets</h3>
+                    <p class="text-gray-400">Interactive Venn diagram explorer with set algebra laws</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Interactive Venn -->
+                <div class="relative h-96 bg-black/30 rounded-xl overflow-hidden" id="venn-container">
+                    <svg id="venn-svg" class="w-full h-full" viewBox="0 0 400 300">
+                        <defs>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <!-- Universal Set -->
+                        <rect x="20" y="20" width="360" height="260" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="5,5"/>
+                        
+                        <!-- Set A -->
+                        <circle id="set-a" cx="160" cy="150" r="80" fill="rgba(0, 243, 255, 0.2)" stroke="#00f3ff" stroke-width="2" class="venn-circle" filter="url(#glow)"/>
+                        <text x="160" y="90" text-anchor="middle" fill="#00f3ff" font-size="14" font-weight="bold">A</text>
+                        
+                        <!-- Set B -->
+                        <circle id="set-b" cx="240" cy="150" r="80" fill="rgba(188, 19, 254, 0.2)" stroke="#bc13fe" stroke-width="2" class="venn-circle" filter="url(#glow)"/>
+                        <text x="240" y="90" text-anchor="middle" fill="#bc13fe" font-size="14" font-weight="bold">B</text>
+                        
+                        <!-- Elements -->
+                        <g id="elements-group"></g>
+                        
+                        <!-- Result Region -->
+                        <path id="result-region" fill="rgba(255, 255, 255, 0.1)" stroke="white" stroke-width="2" opacity="0"/>
+                    </svg>
+                    
+                    <div class="absolute bottom-4 left-4 right-4 flex justify-center gap-2 flex-wrap">
+                        <button onclick="setOperation('union')" class="px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-500 rounded-lg text-cyan-400 text-sm transition-all">A ∪ B</button>
+                        <button onclick="setOperation('intersection')" class="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/40 border border-purple-500 rounded-lg text-purple-400 text-sm transition-all">A ∩ B</button>
+                        <button onclick="setOperation('difference')" class="px-4 py-2 bg-pink-500/20 hover:bg-pink-500/40 border border-pink-500 rounded-lg text-pink-400 text-sm transition-all">A - B</button>
+                        <button onclick="setOperation('symmetric')" class="px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500/40 border border-yellow-500 rounded-lg text-yellow-400 text-sm transition-all">A Δ B</button>
+                        <button onclick="setOperation('complement')" class="px-4 py-2 bg-red-500/20 hover:bg-red-500/40 border border-red-500 rounded-lg text-red-400 text-sm transition-all">A'</button>
+                    </div>
+                </div>
+
+                <!-- Laws & Properties -->
+                <div class="space-y-4">
+                    <div class="bg-black/20 rounded-lg p-4 border border-white/5">
+                        <h4 class="font-bold text-cyan-400 mb-3 flex items-center gap-2">
+                            <span class="w-2 h-2 bg-cyan-400 rounded-full"></span>
+                            Fundamental Laws
+                        </h4>
+                        <div class="space-y-2 text-sm mono">
+                            <div class="flex justify-between items-center p-2 hover:bg-white/5 rounded cursor-pointer" onclick="highlightLaw(this)">
+                                <span class="text-gray-400">Commutative:</span>
+                                <span class="text-cyan-300">A ∪ B = B ∪ A</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 hover:bg-white/5 rounded cursor-pointer" onclick="highlightLaw(this)">
+                                <span class="text-gray-400">Associative:</span>
+                                <span class="text-cyan-300">(A ∪ B) ∪ C = A ∪ (B ∪ C)</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 hover:bg-white/5 rounded cursor-pointer" onclick="highlightLaw(this)">
+                                <span class="text-gray-400">Distributive:</span>
+                                <span class="text-cyan-300">A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C)</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 hover:bg-white/5 rounded cursor-pointer" onclick="highlightLaw(this)">
+                                <span class="text-gray-400">De Morgan's:</span>
+                                <span class="text-cyan-300">(A ∪ B)' = A' ∩ B'</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 hover:bg-white/5 rounded cursor-pointer" onclick="highlightLaw(this)">
+                                <span class="text-gray-400">Identity:</span>
+                                <span class="text-cyan-300">A ∪ ∅ = A</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-black/20 rounded-lg p-4 border border-white/5">
+                        <h4 class="font-bold text-purple-400 mb-2">Current Operation</h4>
+                        <div id="operation-result" class="text-2xl mono text-center py-4 text-white">
+                            Select an operation above
+                        </div>
+                        <div id="operation-desc" class="text-sm text-gray-400 text-center">
+                            Click on the Venn diagram buttons to visualize set operations
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Cartesian Product -->
+        <section id="topic-1" class="topic-section glass-panel rounded-2xl p-8 border border-purple-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center text-2xl">×</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-purple-400">2. Cartesian Product</h3>
+                    <p class="text-gray-400">A × B = {(a,b) | a ∈ A ∧ b ∈ B}</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6">
+                <div class="space-y-4">
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <label class="block text-sm text-gray-400 mb-2">Set A elements (comma separated)</label>
+                        <input type="text" id="set-a-input" value="1, 2, 3" class="w-full bg-black/40 border border-purple-500/30 rounded px-3 py-2 text-purple-300 mono focus:outline-none focus:border-purple-500" onchange="updateCartesian()">
+                    </div>
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <label class="block text-sm text-gray-400 mb-2">Set B elements (comma separated)</label>
+                        <input type="text" id="set-b-input" value="a, b" class="w-full bg-black/40 border border-cyan-500/30 rounded px-3 py-2 text-cyan-300 mono focus:outline-none focus:border-cyan-500" onchange="updateCartesian()">
+                    </div>
+                    <div class="bg-purple-900/20 p-4 rounded-lg border border-purple-500/30">
+                        <div class="text-sm text-gray-400 mb-1">|A × B| = |A| × |B|</div>
+                        <div class="text-2xl mono text-purple-400" id="cartesian-size">6</div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-black/30 rounded-xl p-4 overflow-auto max-h-96">
+                    <div class="grid grid-cols-3 gap-2" id="cartesian-grid">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Binary Relations -->
+        <section id="topic-2" class="topic-section glass-panel rounded-2xl p-8 border border-pink-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-pink-500/20 flex items-center justify-center text-2xl">R</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-pink-400">3. Binary Relation</h3>
+                    <p class="text-gray-400">R ⊆ A × B, Domain, Range, and Matrix Representation</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <div class="flex gap-2 mb-4">
+                        <button onclick="setRelationTab('graph')" class="relation-tab px-4 py-2 bg-pink-500/20 text-pink-400 rounded-lg border border-pink-500/50 active">Graph View</button>
+                        <button onclick="setRelationTab('matrix')" class="relation-tab px-4 py-2 bg-black/40 text-gray-400 rounded-lg border border-white/10">Matrix View</button>
+                    </div>
+                    
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <label class="block text-sm text-gray-400 mb-2">Define Relation R (pairs: a,b; c,d; ...)</label>
+                        <input type="text" id="relation-input" value="1,a; 1,b; 2,a; 3,b" class="w-full bg-black/40 border border-pink-500/30 rounded px-3 py-2 text-pink-300 mono focus:outline-none focus:border-pink-500" onchange="updateRelation()">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-black/20 p-3 rounded-lg">
+                            <div class="text-xs text-gray-500">Domain</div>
+                            <div id="relation-domain" class="text-lg mono text-pink-400">{1, 2, 3}</div>
+                        </div>
+                        <div class="bg-black/20 p-3 rounded-lg">
+                            <div class="text-xs text-gray-500">Range</div>
+                            <div id="relation-range" class="text-lg mono text-cyan-400">{a, b}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="relation-graph-view" class="bg-black/30 rounded-xl h-80 relative overflow-hidden">
+                    <svg id="relation-svg" class="w-full h-full">
+                        <!-- Generated by JS -->
+                    </svg>
+                </div>
+
+                <div id="relation-matrix-view" class="hidden bg-black/30 rounded-xl p-6 overflow-auto">
+                    <table id="relation-matrix" class="w-full text-center">
+                        <!-- Generated by JS -->
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Partial Ordering -->
+        <section id="topic-3" class="topic-section glass-panel rounded-2xl p-8 border border-yellow-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center text-2xl">≤</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-yellow-400">4. Partial Ordering Relation</h3>
+                    <p class="text-gray-400">Reflexive, Antisymmetric, Transitive | Hasse Diagrams</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6">
+                <div class="space-y-4">
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <h4 class="font-bold text-yellow-400 mb-3">Properties Check</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between p-2 bg-black/30 rounded">
+                                <span class="text-sm">Reflexive</span>
+                                <span id="prop-reflexive" class="text-green-400 text-sm">✓ ∀a, a≤a</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 bg-black/30 rounded">
+                                <span class="text-sm">Antisymmetric</span>
+                                <span id="prop-antisymmetric" class="text-green-400 text-sm">✓ a≤b ∧ b≤a → a=b</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 bg-black/30 rounded">
+                                <span class="text-sm">Transitive</span>
+                                <span id="prop-transitive" class="text-green-400 text-sm">✓ a≤b ∧ b≤c → a≤c</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <label class="block text-sm text-gray-400 mb-2">Select Poset Example</label>
+                        <select id="poset-select" onchange="changePoset()" class="w-full bg-black/40 border border-yellow-500/30 rounded px-3 py-2 text-yellow-300 focus:outline-none">
+                            <option value="divisors">Divisors of 12 (|)</option>
+                            <option value="powerset">Power set of {a,b} (⊆)</option>
+                            <option value="subset">Subsets by inclusion</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-yellow-900/20 p-4 rounded-lg border border-yellow-500/30">
+                        <div class="text-sm text-gray-400">Maximal Elements</div>
+                        <div id="maximal-elements" class="text-lg mono text-yellow-400">12</div>
+                        <div class="text-sm text-gray-400 mt-2">Minimal Elements</div>
+                        <div id="minimal-elements" class="text-lg mono text-yellow-400">1</div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-black/30 rounded-xl h-96 relative" id="hasse-container">
+                    <svg id="hasse-svg" class="w-full h-full">
+                        <!-- Generated by JS -->
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Equivalence Relation -->
+        <section id="topic-4" class="topic-section glass-panel rounded-2xl p-8 border border-green-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center text-2xl">≡</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-green-400">5. Equivalence Relation</h3>
+                    <p class="text-gray-400">Partitions, Equivalence Classes, and Quotient Sets</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <label class="block text-sm text-gray-400 mb-2">Modulus n (congruence relation)</label>
+                        <input type="range" min="2" max="8" value="3" class="w-full slider-thumb mb-2" id="equivalence-mod" oninput="updateEquivalence(this.value)">
+                        <div class="text-center text-green-400 mono text-xl">a ≡ b (mod <span id="mod-display">3</span>)</div>
+                    </div>
+
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <h4 class="font-bold text-green-400 mb-3">Properties</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                <span class="text-gray-300">Reflexive: a ≡ a (mod n)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                <span class="text-gray-300">Symmetric: a ≡ b → b ≡ a</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                <span class="text-gray-300">Transitive: a ≡ b ∧ b ≡ c → a ≡ c</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-green-900/20 p-4 rounded-lg border border-green-500/30">
+                        <div class="text-sm text-gray-400 mb-2">Equivalence Classes (Partition of ℤ)</div>
+                        <div id="equivalence-classes" class="space-y-2">
+                            <!-- Generated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-black/30 rounded-xl p-6 relative overflow-hidden">
+                    <div id="equivalence-visual" class="grid grid-cols-5 gap-2 max-w-md mx-auto">
+                        <!-- Generated by JS -->
+                    </div>
+                    <div class="mt-6 text-center text-sm text-gray-400">
+                        Numbers with the same color are equivalent (same remainder)
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Image of a Set -->
+        <section id="topic-5" class="topic-section glass-panel rounded-2xl p-8 border border-orange-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center text-2xl">f(A)</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-orange-400">6. Image of a Set</h3>
+                    <p class="text-gray-400">Direct Image f(A) and Inverse Image f⁻¹(B)</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <label class="block text-sm text-gray-400 mb-2">Function: f(x) = </label>
+                        <select id="function-select" onchange="updateImage()" class="w-full bg-black/40 border border-orange-500/30 rounded px-3 py-2 text-orange-300 focus:outline-none mb-4">
+                            <option value="square">x²</option>
+                            <option value="double">2x</option>
+                            <option value="mod">x mod 3</option>
+                            <option value="abs">|x|</option>
+                        </select>
+                        
+                        <label class="block text-sm text-gray-400 mb-2">Input Set A</label>
+                        <input type="text" id="input-set" value="-2, -1, 0, 1, 2" class="w-full bg-black/40 border border-orange-500/30 rounded px-3 py-2 text-orange-300 mono focus:outline-none" onchange="updateImage()">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-orange-900/20 p-4 rounded-lg border border-orange-500/30">
+                            <div class="text-xs text-gray-400 mb-1">Direct Image f(A)</div>
+                            <div id="direct-image" class="text-lg mono text-orange-400">{4, 1, 0}</div>
+                        </div>
+                        <div class="bg-cyan-900/20 p-4 rounded-lg border border-cyan-500/30">
+                            <div class="text-xs text-gray-400 mb-1">Inverse Image f⁻¹({0,1})</div>
+                            <div id="inverse-image" class="text-lg mono text-cyan-400">{0, -1, 1}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-black/30 rounded-xl h-80 relative overflow-hidden flex items-center justify-center">
+                    <svg id="function-svg" class="w-full h-full">
+                        <!-- Domain -->
+                        <text x="50" y="30" fill="#666" font-size="12">Domain A</text>
+                        <g id="domain-elements"></g>
+                        
+                        <!-- Codomain -->
+                        <text x="250" y="30" fill="#666" font-size="12">Codomain B</text>
+                        <g id="codomain-elements"></g>
+                        
+                        <!-- Arrows -->
+                        <g id="function-arrows"></g>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. Cardinality -->
+        <section id="topic-6" class="topic-section glass-panel rounded-2xl p-8 border border-red-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-2xl">|A|</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-red-400">7. Cardinality of Sets</h3>
+                    <p class="text-gray-400">Size comparisons and cardinal numbers</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6 mb-8">
+                <div class="cardinal-comparison bg-black/20 p-6 rounded-xl border border-white/10 cursor-pointer" onclick="compareSets('natural', 'even')">
+                    <div class="text-4xl mb-2">ℕ vs 2ℕ</div>
+                    <div class="text-sm text-gray-400 mb-3">Natural vs Even numbers</div>
+                    <div class="text-xs text-red-400">Click to see bijection</div>
+                </div>
+                
+                <div class="cardinal-comparison bg-black/20 p-6 rounded-xl border border-white/10 cursor-pointer" onclick="compareSets('natural', 'rational')">
+                    <div class="text-4xl mb-2">ℕ vs ℚ</div>
+                    <div class="text-sm text-gray-400 mb-3">Natural vs Rational</div>
+                    <div class="text-xs text-red-400">Click to see diagonalization</div>
+                </div>
+                
+                <div class="cardinal-comparison bg-black/20 p-6 rounded-xl border border-white/10 cursor-pointer" onclick="compareSets('natural', 'real')">
+                    <div class="text-4xl mb-2">ℕ vs ℝ</div>
+                    <div class="text-sm text-gray-400 mb-3">Countable vs Uncountable</div>
+                    <div class="text-xs text-red-400">Click for Cantor's diagonal</div>
+                </div>
+            </div>
+
+            <div class="bg-black/30 rounded-xl p-6">
+                <div id="cardinality-demo" class="h-64 flex items-center justify-center relative overflow-hidden">
+                    <div class="text-center text-gray-500" id="cardinality-placeholder">
+                        Select a comparison above to visualize cardinality relationships
+                    </div>
+                    <svg id="cardinality-svg" class="absolute inset-0 w-full h-full hidden">
+                        <!-- Generated by JS -->
+                    </svg>
+                </div>
+                
+                <div id="cardinality-info" class="mt-4 p-4 bg-red-900/20 rounded-lg border border-red-500/30 hidden">
+                    <div class="text-lg font-bold text-red-400 mb-2" id="cardinality-title"></div>
+                    <div class="text-gray-300" id="cardinality-desc"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. Finite and Infinite Sets -->
+        <section id="topic-7" class="topic-section glass-panel rounded-2xl p-8 border border-indigo-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center text-2xl infinity-symbol">∞</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-indigo-400">8. Finite and Infinite Sets</h3>
+                    <p class="text-gray-400">Dedekind infinite, countable and uncountable sets</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <h4 class="font-bold text-indigo-400 mb-3">Finite Set Properties</h4>
+                        <ul class="space-y-2 text-sm text-gray-300">
+                            <li class="flex items-start gap-2">
+                                <span class="text-indigo-400 mt-1">•</span>
+                                <span>No bijection with proper subset</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-indigo-400 mt-1">•</span>
+                                <span>|A| = n for some n ∈ ℕ</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <h4 class="font-bold text-indigo-400 mb-3">Infinite Set Properties</h4>
+                        <ul class="space-y-2 text-sm text-gray-300">
+                            <li class="flex items-start gap-2">
+                                <span class="text-indigo-400 mt-1">•</span>
+                                <span>Exists bijection with proper subset (Dedekind infinite)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-indigo-400 mt-1">•</span>
+                                <span>Contains countably infinite subset</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-black/30 rounded-xl p-6">
+                    <div class="text-center mb-4 text-gray-400">Hilbert's Hotel Visualization</div>
+                    <div class="flex justify-center items-end h-48 gap-2" id="hotel-visual">
+                        <!-- Generated by JS -->
+                    </div>
+                    <div class="mt-4 flex justify-center gap-2">
+                        <button onclick="hotelShift('right')" class="px-4 py-2 bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500 rounded text-indigo-400 text-sm">Shift Right (Room for one more)</button>
+                        <button onclick="hotelShift('double')" class="px-4 py-2 bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500 rounded text-indigo-400 text-sm">Double Shift (Room for ∞ more)</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 9. Functions (Definition and Types) -->
+        <section id="topic-8" class="topic-section glass-panel rounded-2xl p-8 border border-cyan-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center text-2xl">ƒ: X→Y</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-cyan-400">9. Functions: Definition and Types</h3>
+                    <p class="text-gray-400">Injective, Surjective, Bijective functions with visual proofs</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6">
+                <div class="space-y-3">
+                    <div class="function-type-card bg-black/20 p-4 rounded-lg cursor-pointer" onclick="showFunctionType('injective')">
+                        <div class="font-bold text-cyan-400 mb-1">Injective (One-to-One)</div>
+                        <div class="text-xs text-gray-400 mb-2">ƒ(a) = ƒ(b) → a = b</div>
+                        <div class="text-xs text-gray-500">No two inputs map to same output</div>
+                    </div>
+                    
+                    <div class="function-type-card bg-black/20 p-4 rounded-lg cursor-pointer" onclick="showFunctionType('surjective')">
+                        <div class="font-bold text-purple-400 mb-1">Surjective (Onto)</div>
+                        <div class="text-xs text-gray-400 mb-2">∀y ∈ Y, ∃x ∈ X: ƒ(x) = y</div>
+                        <div class="text-xs text-gray-500">Every output is covered</div>
+                    </div>
+                    
+                    <div class="function-type-card bg-black/20 p-4 rounded-lg cursor-pointer" onclick="showFunctionType('bijective')">
+                        <div class="font-bold text-green-400 mb-1">Bijective</div>
+                        <div class="text-xs text-gray-400 mb-2">Both injective and surjective</div>
+                        <div class="text-xs text-gray-500">Perfect one-to-one correspondence</div>
+                    </div>
+
+                    <div class="bg-cyan-900/20 p-4 rounded-lg border border-cyan-500/30 mt-4">
+                        <div class="text-sm text-gray-400 mb-2">Current Type</div>
+                        <div id="function-type-display" class="text-xl font-bold text-cyan-400">Select a type above</div>
+                        <div id="function-type-desc" class="text-sm text-gray-400 mt-2">Click to visualize different function types</div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-black/30 rounded-xl h-96 relative overflow-hidden" id="function-type-viz">
+                    <svg id="function-type-svg" class="w-full h-full">
+                        <!-- Generated by JS -->
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. Sum and Product of Functions -->
+        <section id="topic-9" class="topic-section glass-panel rounded-2xl p-8 border border-purple-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center text-2xl">ƒ+g</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-purple-400">10. Sum and Product of Functions</h3>
+                    <p class="text-gray-400">(ƒ + g)(x) = ƒ(x) + g(x) and (ƒ · g)(x) = ƒ(x) · g(x)</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <label class="block text-sm text-gray-400 mb-2">Function ƒ(x)</label>
+                        <select id="func-f-select" onchange="updateFunctionOperations()" class="w-full bg-black/40 border border-purple-500/30 rounded px-3 py-2 text-purple-300 focus:outline-none mb-2">
+                            <option value="x">x</option>
+                            <option value="x2">x²</option>
+                            <option value="sin">sin(x)</option>
+                            <option value="exp">e^x</option>
+                        </select>
+                    </div>
+                    
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <label class="block text-sm text-gray-400 mb-2">Function g(x)</label>
+                        <select id="func-g-select" onchange="updateFunctionOperations()" class="w-full bg-black/40 border border-cyan-500/30 rounded px-3 py-2 text-cyan-300 focus:outline-none mb-2">
+                            <option value="2">2 (constant)</option>
+                            <option value="x">x</option>
+                            <option value="cos">cos(x)</option>
+                            <option value="ln">ln(x+1)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-purple-900/20 p-3 rounded-lg border border-purple-500/30">
+                            <div class="text-xs text-gray-400 mb-1">(ƒ + g)(x)</div>
+                            <div id="sum-formula" class="text-sm mono text-purple-400">x + 2</div>
+                        </div>
+                        <div class="bg-cyan-900/20 p-3 rounded-lg border border-cyan-500/30">
+                            <div class="text-xs text-gray-400 mb-1">(ƒ · g)(x)</div>
+                            <div id="product-formula" class="text-sm mono text-cyan-400">2x</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-black/30 rounded-xl h-80" id="function-plot-container">
+                    <!-- Plotly chart will be rendered here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 11. Bijective Functions -->
+        <section id="topic-10" class="topic-section glass-panel rounded-2xl p-8 border border-green-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center text-2xl">↔</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-green-400">11. Bijective Functions</h3>
+                    <p class="text-gray-400">One-to-one correspondence and cardinality preservation</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <h4 class="font-bold text-green-400 mb-3">Bijection Properties</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center gap-2 p-2 bg-black/30 rounded">
+                                <span class="text-green-400">✓</span>
+                                <span class="text-gray-300">Injective: No collisions</span>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-black/30 rounded">
+                                <span class="text-green-400">✓</span>
+                                <span class="text-gray-300">Surjective: Full coverage</span>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-black/30 rounded">
+                                <span class="text-green-400">⇒</span>
+                                <span class="text-gray-300">|Domain| = |Codomain|</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <label class="block text-sm text-gray-400 mb-2">Select Bijection Example</label>
+                        <select id="bijection-select" onchange="updateBijection()" class="w-full bg-black/40 border border-green-500/30 rounded px-3 py-2 text-green-300 focus:outline-none">
+                            <option value="shift">f(x) = x + 1 (ℤ → ℤ)</option>
+                            <option value="square">f(x) = x² (ℝ⁺ → ℝ⁺)</option>
+                            <option value="linear">f(x) = 2x + 3 (ℝ → ℝ)</option>
+                            <option value="inverse">f(x) = 1/x (ℝ⁺ → ℝ⁺)</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-green-900/20 p-4 rounded-lg border border-green-500/30">
+                        <div class="text-sm text-gray-400 mb-2">Cardinality Implication</div>
+                        <div class="text-lg mono text-green-400" id="bijection-cardinality">|ℤ| = |ℤ| (Same cardinality)</div>
+                    </div>
+                </div>
+
+                <div class="bg-black/30 rounded-xl h-96 relative overflow-hidden">
+                    <svg id="bijection-svg" class="w-full h-full">
+                        <!-- Generated by JS -->
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- 12. Inverse Function -->
+        <section id="topic-11" class="topic-section glass-panel rounded-2xl p-8 border border-pink-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-pink-500/20 flex items-center justify-center text-2xl">ƒ⁻¹</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-pink-400">12. Inverse Function</h3>
+                    <p class="text-gray-400">ƒ⁻¹(y) = x iff ƒ(x) = y. Exists iff ƒ is bijective.</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <label class="block text-sm text-gray-400 mb-2">Function ƒ(x)</label>
+                        <select id="inverse-f-select" onchange="updateInverse()" class="w-full bg-black/40 border border-pink-500/30 rounded px-3 py-2 text-pink-300 focus:outline-none mb-4">
+                            <option value="2x">f(x) = 2x</option>
+                            <option value="x3">f(x) = x³</option>
+                            <option value="x2">f(x) = x² (not bijective)</option>
+                            <option value="exp">f(x) = e^x</option>
+                        </select>
+                        
+                        <div class="bg-pink-900/20 p-3 rounded border border-pink-500/30">
+                            <div class="text-xs text-gray-400 mb-1">Inverse ƒ⁻¹(x)</div>
+                            <div id="inverse-result" class="text-lg mono text-pink-400">f⁻¹(x) = x/2</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <h4 class="font-bold text-pink-400 mb-3">Inverse Properties</h4>
+                        <div class="space-y-2 text-sm mono text-gray-300">
+                            <div>ƒ⁻¹(ƒ(x)) = x</div>
+                            <div>ƒ(ƒ⁻¹(y)) = y</div>
+                            <div>(ƒ⁻¹)⁻¹ = ƒ</div>
+                        </div>
+                    </div>
+
+                    <div id="inverse-warning" class="hidden bg-red-900/20 p-3 rounded border border-red-500/30">
+                        <div class="text-sm text-red-400">⚠ Not bijective - inverse not a function</div>
+                    </div>
+                </div>
+
+                <div class="bg-black/30 rounded-xl h-80 relative overflow-hidden">
+                    <svg id="inverse-svg" class="w-full h-full">
+                        <!-- Generated by JS -->
+                    </svg>
+                    <div class="absolute bottom-4 left-4 text-xs text-gray-500">Click points to see mapping</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 13. Composite Function -->
+        <section id="topic-12" class="topic-section glass-panel rounded-2xl p-8 border border-yellow-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center text-2xl">ƒ∘g</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-yellow-400">13. Composite Function</h3>
+                    <p class="text-gray-400">(ƒ ∘ g)(x) = ƒ(g(x)). Associative but not commutative.</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6">
+                <div class="space-y-4">
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <label class="block text-sm text-gray-400 mb-2">g(x) - First applied</label>
+                        <select id="comp-g-select" onchange="updateComposite()" class="w-full bg-black/40 border border-yellow-500/30 rounded px-3 py-2 text-yellow-300 focus:outline-none">
+                            <option value="x2">g(x) = x + 2</option>
+                            <option value="2x">g(x) = 2x</option>
+                            <option value="x2">g(x) = x²</option>
+                        </select>
+                    </div>
+                    
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <label class="block text-sm text-gray-400 mb-2">ƒ(x) - Second applied</label>
+                        <select id="comp-f-select" onchange="updateComposite()" class="w-full bg-black/40 border border-orange-500/30 rounded px-3 py-2 text-orange-300 focus:outline-none">
+                            <option value="3x">f(x) = 3x</option>
+                            <option value="x1">f(x) = x - 1</option>
+                            <option value="sin">f(x) = sin(x)</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-yellow-900/20 p-4 rounded-lg border border-yellow-500/30">
+                        <div class="text-sm text-gray-400 mb-2">Composition (ƒ ∘ g)(x)</div>
+                        <div id="composite-formula" class="text-lg mono text-yellow-400">3(x + 2) = 3x + 6</div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-black/30 rounded-xl p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-center flex-1">
+                            <div class="text-sm text-gray-400">X</div>
+                            <div id="comp-input" class="text-2xl font-bold text-white">2</div>
+                        </div>
+                        <div class="text-yellow-400 text-2xl">→</div>
+                        <div class="text-center flex-1">
+                            <div class="text-sm text-gray-400">g(X)</div>
+                            <div id="comp-middle" class="text-2xl font-bold text-yellow-400">4</div>
+                        </div>
+                        <div class="text-orange-400 text-2xl">→</div>
+                        <div class="text-center flex-1">
+                            <div class="text-sm text-gray-400">f(g(X))</div>
+                            <div id="comp-output" class="text-2xl font-bold text-orange-400">12</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <input type="range" min="-5" max="5" value="2" step="0.5" class="w-full slider-thumb" id="composite-slider" oninput="updateCompositeValue(this.value)">
+                        <div class="text-center text-sm text-gray-400 mt-2">Drag to change input value</div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-black/40 rounded text-sm text-gray-400">
+                        <strong class="text-yellow-400">Step by step:</strong>
+                        <div id="composite-steps" class="mt-2 space-y-1">
+                            <div class="composite-step">1. Start with x = 2</div>
+                            <div class="composite-step">2. Apply g: g(2) = 2 + 2 = 4</div>
+                            <div class="composite-step">3. Apply f: f(4) = 3 × 4 = 12</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 14. Countable Sets -->
+        <section id="topic-13" class="topic-section glass-panel rounded-2xl p-8 border border-orange-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center text-2xl">ℵ₀</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-orange-400">14. Countable Sets</h3>
+                    <p class="text-gray-400">ℵ₀ - Sets with cardinality of natural numbers</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <h4 class="font-bold text-orange-400 mb-3">Countable Set Definition</h4>
+                        <p class="text-sm text-gray-300 mb-3">A set S is countable if there exists a bijection between S and ℕ (or a subset of ℕ).</p>
+                        <div class="text-xs text-gray-400">Equivalently: Elements can be listed in a sequence</div>
+                    </div>
+
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <label class="block text-sm text-gray-400 mb-2">Examples of Countable Sets</label>
+                        <div class="space-y-2">
+                            <button onclick="showCountable('integers')" class="w-full text-left p-2 hover:bg-orange-500/20 rounded text-sm text-orange-300 transition-colors">ℤ (Integers)</button>
+                            <button onclick="showCountable('rationals')" class="w-full text-left p-2 hover:bg-orange-500/20 rounded text-sm text-orange-300 transition-colors">ℚ (Rational numbers)</button>
+                            <button onclick="showCountable('algebraic')" class="w-full text-left p-2 hover:bg-orange-500/20 rounded text-sm text-orange-300 transition-colors">Algebraic numbers</button>
+                            <button onclick="showCountable('finite')" class="w-full text-left p-2 hover:bg-orange-500/20 rounded text-sm text-orange-300 transition-colors">Finite sets</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-orange-900/20 p-4 rounded-lg border border-orange-500/30">
+                        <div class="text-sm text-gray-400 mb-2">Enumeration</div>
+                        <div id="countable-sequence" class="text-sm mono text-orange-400 overflow-x-auto">
+                            0, 1, -1, 2, -2, 3, -3, ...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-black/30 rounded-xl p-6">
+                    <div class="text-center mb-4 text-gray-400" id="countable-title">Integers ℤ</div>
+                    <div id="countable-visual" class="h-64 flex flex-wrap content-start gap-2 overflow-y-auto">
+                        <!-- Generated by JS -->
+                    </div>
+                    <div class="mt-4 text-center text-sm text-gray-500">
+                        Each element corresponds to exactly one natural number
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 15. Uncountable Sets -->
+        <section id="topic-14" class="topic-section glass-panel rounded-2xl p-8 border border-red-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-2xl">ℝ</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-red-400">15. Uncountable Sets</h3>
+                    <p class="text-gray-400">Sets strictly larger than ℕ. No complete enumeration possible.</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <h4 class="font-bold text-red-400 mb-3">Uncountable Set Definition</h4>
+                        <p class="text-sm text-gray-300 mb-3">A set is uncountable if it is infinite and not countable. No bijection with ℕ exists.</p>
+                        <div class="text-xs text-gray-400">Cardinality: |ℝ| = 𝔠 = 2^ℵ₀</div>
+                    </div>
+
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <h4 class="font-bold text-red-400 mb-3">Examples</h4>
+                        <ul class="space-y-2 text-sm text-gray-300">
+                            <li class="flex items-center gap-2">
+                                <span class="text-red-400">•</span>
+                                <span>Real numbers ℝ</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-red-400">•</span>
+                                <span>Interval [0,1]</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-red-400">•</span>
+                                <span>Power set of ℕ (P(ℕ))</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-red-400">•</span>
+                                <span>Set of all functions ℕ → {0,1}</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-red-900/20 p-4 rounded-lg border border-red-500/30">
+                        <div class="text-sm text-gray-400 mb-2">Cardinality Comparison</div>
+                        <div class="text-lg mono text-red-400">ℵ₀ < 𝔠</div>
+                        <div class="text-xs text-gray-500 mt-1">There are infinitely many sizes of infinity!</div>
+                    </div>
+                </div>
+
+                <div class="bg-black/30 rounded-xl p-6 flex flex-col items-center justify-center">
+                    <div class="text-center mb-6">
+                        <div class="text-6xl mb-4 text-red-500">ℝ</div>
+                        <div class="text-gray-400">The continuum cannot be listed</div>
+                    </div>
+                    
+                    <div class="w-full max-w-md space-y-2">
+                        <div class="text-xs text-gray-500 mb-2">Attempt to list real numbers in [0,1]:</div>
+                        <div class="font-mono text-sm space-y-1" id="real-list">
+                            <div class="text-red-400">r₁ = 0.14159...</div>
+                            <div class="text-red-400">r₂ = 0.27182...</div>
+                            <div class="text-red-400">r₃ = 0.61803...</div>
+                            <div class="text-red-400">...</div>
+                        </div>
+                        <div class="mt-4 p-3 bg-red-900/30 rounded border border-red-500/50 text-sm text-red-300">
+                            <strong>Always missing:</strong> The diagonal number 0.258... differs from every listed number at some digit.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 16. Cantor's Diagonal Argument -->
+        <section id="topic-15" class="topic-section glass-panel rounded-2xl p-8 border border-indigo-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center text-2xl">D</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-indigo-400">16. Cantor's Diagonal Argument</h3>
+                    <p class="text-gray-400">Proof that ℝ is uncountable |ℝ| > |ℕ|</p>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-black/20 p-6 rounded-lg">
+                    <h4 class="font-bold text-indigo-400 mb-4">The Proof Strategy</h4>
+                    <ol class="list-decimal list-inside space-y-2 text-sm text-gray-300">
+                        <li>Assume ℝ is countable (can be listed completely)</li>
+                        <li>Construct a new number by diagonalization</li>
+                        <li>Show this number is not in the list (contradiction)</li>
+                        <li>Therefore, ℝ is uncountable</li>
+                    </ol>
+                </div>
+
+                <div class="bg-black/30 rounded-xl p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-bold text-indigo-400">Interactive Diagonalization</h4>
+                        <button onclick="generateNewDiagonal()" class="px-4 py-2 bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500 rounded text-indigo-400 text-sm transition-colors">
+                            Generate New Counter-example
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-center mono text-sm" id="diagonal-table">
+                            <thead>
+                                <tr class="text-gray-400">
+                                    <th class="p-2">Index</th>
+                                    <th class="p-2">Real Number</th>
+                                    <th class="p-2" id="diagonal-digits">Diagonal Digits</th>
+                                </tr>
+                            </thead>
+                            <tbody id="diagonal-body">
+                                <!-- Generated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-indigo-900/20 rounded-lg border border-indigo-500/30">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm text-gray-400 mb-1">New Number (different at diagonal):</div>
+                                <div id="diagonal-result" class="text-2xl mono text-indigo-400">0.______</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-gray-400 mb-1">Status:</div>
+                                <div class="text-green-400 font-bold">NOT IN LIST ✓</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 17. Power Set Theorem -->
+        <section id="topic-16" class="topic-section glass-panel rounded-2xl p-8 border border-cyan-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center text-2xl">2^S</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-cyan-400">17. Power Set Theorem</h3>
+                    <p class="text-gray-400">|P(S)| > |S| for any set S. No surjection from S to P(S).</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <h4 class="font-bold text-cyan-400 mb-3">Theorem Statement</h4>
+                        <p class="text-sm text-gray-300 mb-3">For any set S, the power set P(S) has strictly greater cardinality than S.</p>
+                        <div class="text-center text-xl mono text-cyan-400 mb-2">|P(S)| = 2^|S| > |S|</div>
+                    </div>
+
+                    <div class="bg-black/20 p-4 rounded-lg">
+                        <label class="block text-sm text-gray-400 mb-2">Select Set S</label>
+                        <select id="power-set-base" onchange="updatePowerSet()" class="w-full bg-black/40 border border-cyan-500/30 rounded px-3 py-2 text-cyan-300 focus:outline-none">
+                            <option value="3">S = {a, b, c} (|S| = 3)</option>
+                            <option value="2">S = {1, 2} (|S| = 2)</option>
+                            <option value="4">S = {1, 2, 3, 4} (|S| = 4)</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-cyan-900/20 p-4 rounded-lg border border-cyan-500/30">
+                        <div class="text-sm text-gray-400 mb-2">Power Set P(S)</div>
+                        <div id="power-set-display" class="text-sm mono text-cyan-400 space-y-1">
+                            <!-- Generated by JS -->
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-cyan-500/30 flex justify-between">
+                            <span class="text-gray-400">|P(S)| =</span>
+                            <span class="text-xl font-bold text-cyan-400" id="power-set-size">8</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-black/30 rounded-xl p-6">
+                    <div class="text-center mb-4 text-gray-400">Visual Representation</div>
+                    <div id="power-set-viz" class="flex flex-wrap justify-center gap-3">
+                        <!-- Generated by JS -->
+                    </div>
+                    
+                    <div class="mt-6 p-4 bg-black/40 rounded-lg">
+                        <div class="text-sm text-gray-400 mb-2">Cantor's Argument:</div>
+                        <div class="text-sm text-gray-300">
+                            For any function ƒ: S → P(S), the set D = {x ∈ S | x ∉ ƒ(x)} is not in the image of ƒ.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 18. Schröder–Bernstein Theorem -->
+        <section id="topic-17" class="topic-section glass-panel rounded-2xl p-8 border border-purple-500/30">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center text-2xl">|A|=|B|</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-purple-400">18. Schröder–Bernstein Theorem</h3>
+                    <p class="text-gray-400">If |A| ≤ |B| and |B| ≤ |A|, then |A| = |B|</p>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-black/20 p-6 rounded-lg">
+                    <h4 class="font-bold text-purple-400 mb-3">Theorem Statement</h4>
+                    <p class="text-sm text-gray-300 mb-4">If there exist injective functions ƒ: A → B and g: B → A, then there exists a bijection h: A → B.</p>
+                    <div class="flex justify-center items-center gap-4 text-2xl mono">
+                        <span class="text-cyan-400">A</span>
+                        <span class="text-gray-500">⇄</span>
+                        <span class="text-purple-400">B</span>
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="bg-black/20 p-4 rounded-lg">
+                            <label class="block text-sm text-gray-400 mb-3">Example: (0,1) and [0,1]</label>
+                            <div class="space-y-2 text-sm text-gray-300">
+                                <div class="sbt-compare p-2 rounded flex justify-between">
+                                    <span>ƒ: (0,1) → [0,1]</span>
+                                    <span class="mono text-cyan-400">ƒ(x) = x</span>
+                                </div>
+                                <div class="sbt-compare p-2 rounded flex justify-between">
+                                    <span>g: [0,1] → (0,1)</span>
+                                    <span class="mono text-purple-400">g(x) = x/2 + 1/4</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-purple-900/20 p-4 rounded-lg border border-purple-500/30">
+                            <div class="text-sm text-gray-400 mb-2">Conclusion</div>
+                            <div class="text-lg text-purple-400 font-bold">|(0,1)| = |[0,1]|</div>
+                            <div class="text-xs text-gray-500 mt-1">Open and closed intervals have the same cardinality</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-black/30 rounded-xl p-6">
+                        <div class="text-center mb-4 text-gray-400">Visualization of Injections</div>
+                        <svg id="sbt-svg" class="w-full h-64" viewBox="0 0 400 250">
+                            <!-- Set A -->
+                            <ellipse cx="100" cy="125" rx="60" ry="80" fill="none" stroke="#00f3ff" stroke-width="2"/>
+                            <text x="100" y="40" text-anchor="middle" fill="#00f3ff" font-size="16">A = (0,1)</text>
+                            
+                            <!-- Set B -->
+                            <ellipse cx="300" cy="125" rx="60" ry="80" fill="none" stroke="#bc13fe" stroke-width="2"/>
+                            <text x="300" y="40" text-anchor="middle" fill="#bc13fe" font-size="16">B = [0,1]</text>
+                            
+                            <!-- f: A → B -->
+                            <path d="M 160 100 Q 230 80 240 100" fill="none" stroke="#00f3ff" stroke-width="2" marker-end="url(#arrowhead-cyan)" opacity="0.6"/>
+                            <text x="200" y="85" text-anchor="middle" fill="#00f3ff" font-size="12">ƒ(x)=x</text>
+                            
+                            <!-- g: B → A -->
+                            <path d="M 240 150 Q 170 170 160 150" fill="none" stroke="#bc13fe" stroke-width="2" marker-end="url(#arrowhead-purple)" opacity="0.6"/>
+                            <text x="200" y="175" text-anchor="middle" fill="#bc13fe" font-size="12">g(x)=x/2+1/4</text>
+                            
+                            <!-- Result -->
+                            <text x="200" y="220" text-anchor="middle" fill="#00ff9d" font-size="14" font-weight="bold">∴ Bijection exists</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- SVG Definitions -->
+    <svg style="display: none;">
+        <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="rgba(255,255,255,0.5)"/>
+            </marker>
+            <marker id="arrowhead-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#fb923c"/>
+            </marker>
+            <marker id="arrowhead-cyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#00f3ff"/>
+            </marker>
+            <marker id="arrowhead-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#bc13fe"/>
+            </marker>
+        </defs>
+    </svg>
+
+    <script>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initVenn();
+            updateCartesian();
+            updateRelation();
+            changePoset();
+            updateEquivalence(3);
+            updateImage();
+            initHeroAnimation();
+            initHotel();
+            showFunctionType('injective');
+            updateFunctionOperations();
+            updateBijection();
+            updateInverse();
+            updateComposite();
+            showCountable('integers');
+            generateNewDiagonal();
+            updatePowerSet();
+        });
+
+        // Hero Animation
+        function initHeroAnimation() {
+            const canvas = document.getElementById('hero-canvas');
+            if (!canvas.getContext) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = 400;
+            
+            const particles = [];
+            for (let i = 0; i < 50; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    radius: Math.random() * 2
+                });
+            }
+            
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#00f3ff';
+                
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        function activateTopic(index) {
+            const section = document.getElementById(`topic-${index}`);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                section.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    section.style.transform = 'scale(1)';
+                }, 300);
+            }
+        }
+
+        function scrollToSection(id) {
+            const map = {
+                'sets': 'topic-0',
+                'relations': 'topic-2',
+                'functions': 'topic-8',
+                'cardinality': 'topic-13',
+                'advanced': 'topic-15'
+            };
+            const target = document.getElementById(map[id]);
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 1. Set Operations
+        let currentOperation = null;
+        
+        function initVenn() {
+            const svg = document.getElementById('venn-svg');
+            const elements = ['x1', 'x2', 'x3', 'x4', 'x5'];
+            const positions = [
+                {x: 120, y: 130, inA: true, inB: false},
+                {x: 200, y: 150, inA: true, inB: true},
+                {x: 280, y: 130, inA: false, inB: true},
+                {x: 160, y: 190, inA: true, inB: false},
+                {x: 300, y: 180, inA: false, inB: false}
+            ];
+            
+            const group = document.getElementById('elements-group');
+            positions.forEach((pos, i) => {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', pos.x);
+                text.setAttribute('y', pos.y);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', 'white');
+                text.setAttribute('font-size', '16');
+                text.setAttribute('font-weight', 'bold');
+                text.textContent = elements[i];
+                text.dataset.inA = pos.inA;
+                text.dataset.inB = pos.inB;
+                group.appendChild(text);
+            });
+        }
+
+        function setOperation(op) {
+            currentOperation = op;
+            const resultRegion = document.getElementById('result-region');
+            const desc = document.getElementById('operation-desc');
+            const result = document.getElementById('operation-result');
+            const elements = document.querySelectorAll('#elements-group text');
+            
+            resultRegion.setAttribute('opacity', '0');
+            elements.forEach(el => el.setAttribute('fill', 'white'));
+            
+            let path = '';
+            let description = '';
+            let formula = '';
+            
+            switch(op) {
+                case 'union':
+                    path = 'M 160 150 m -80 0 a 80 80 0 1 0 160 0 a 80 80 0 1 0 -160 0 M 240 150 m -80 0 a 80 80 0 1 0 160 0 a 80 80 0 1 0 -160 0';
+                    description = 'All elements in A OR B';
+                    formula = 'A ∪ B = {x | x ∈ A ∨ x ∈ B}';
+                    elements.forEach(el => {
+                        if (el.dataset.inA === 'true' || el.dataset.inB === 'true') 
+                            el.setAttribute('fill', '#00f3ff');
+                    });
+                    break;
+                case 'intersection':
+                    path = 'M 200 150 m -40 0 a 40 40 0 0 1 80 0 a 40 40 0 0 1 -80 0';
+                    description = 'Elements in BOTH A and B';
+                    formula = 'A ∩ B = {x | x ∈ A ∧ x ∈ B}';
+                    elements.forEach(el => {
+                        if (el.dataset.inA === 'true' && el.dataset.inB === 'true') 
+                            el.setAttribute('fill', '#bc13fe');
+                    });
+                    break;
+                case 'difference':
+                    path = 'M 160 150 m -80 0 a 80 80 0 1 0 160 0 a 80 80 0 1 0 -160 0 M 240 150 m -80 0 a 80 80 0 1 0 0 160';
+                    description = 'Elements in A but NOT in B';
+                    formula = 'A - B = {x | x ∈ A ∧ x ∉ B}';
+                    elements.forEach(el => {
+                        if (el.dataset.inA === 'true' && el.dataset.inB === 'false') 
+                            el.setAttribute('fill', '#ff006e');
+                    });
+                    break;
+                case 'symmetric':
+                    description = 'Elements in exactly one of A or B';
+                    formula = 'A Δ B = (A - B) ∪ (B - A)';
+                    elements.forEach(el => {
+                        if ((el.dataset.inA === 'true') !== (el.dataset.inB === 'true')) 
+                            el.setAttribute('fill', '#fbbf24');
+                    });
+                    break;
+                case 'complement':
+                    description = 'Elements NOT in A (relative to U)';
+                    formula = "A' = U - A = {x | x ∉ A}";
+                    elements.forEach(el => {
+                        if (el.dataset.inA === 'false') 
+                            el.setAttribute('fill', '#ef4444');
+                    });
+                    break;
+            }
+            
+            if (path) {
+                resultRegion.setAttribute('d', path);
+                resultRegion.setAttribute('opacity', '0.3');
+            }
+            
+            desc.textContent = description;
+            result.textContent = formula;
+        }
+
+        function highlightLaw(element) {
+            document.querySelectorAll('.bg-white\\/5').forEach(el => el.classList.remove('bg-cyan-500/20'));
+            element.classList.add('bg-cyan-500/20');
+        }
+
+        // 2. Cartesian Product
+        function updateCartesian() {
+            const a = document.getElementById('set-a-input').value.split(',').map(s => s.trim()).filter(s => s);
+            const b = document.getElementById('set-b-input').value.split(',').map(s => s.trim()).filter(s => s);
+            
+            document.getElementById('cartesian-size').textContent = a.length * b.length;
+            
+            const grid = document.getElementById('cartesian-grid');
+            grid.innerHTML = '';
+            
+            const empty = document.createElement('div');
+            grid.appendChild(empty);
+            b.forEach(el => {
+                const header = document.createElement('div');
+                header.className = 'text-cyan-400 font-bold text-center p-2';
+                header.textContent = el;
+                grid.appendChild(header);
+            });
+            
+            a.forEach((ai, i) => {
+                const rowHeader = document.createElement('div');
+                rowHeader.className = 'text-purple-400 font-bold p-2 flex items-center justify-end';
+                rowHeader.textContent = ai;
+                grid.appendChild(rowHeader);
+                
+                b.forEach((bj, j) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'bg-black/40 border border-white/10 rounded p-2 text-center hover:bg-purple-500/20 transition-colors cursor-pointer';
+                    cell.textContent = `(${ai},${bj})`;
+                    cell.style.gridColumn = j + 2;
+                    grid.appendChild(cell);
+                });
+            });
+            
+            grid.style.gridTemplateColumns = `auto repeat(${b.length}, 1fr)`;
+        }
+
+        // 3. Binary Relations
+        function setRelationTab(tab) {
+            document.querySelectorAll('.relation-tab').forEach(t => {
+                t.classList.remove('active', 'bg-pink-500/20', 'text-pink-400', 'border-pink-500/50');
+                t.classList.add('bg-black/40', 'text-gray-400', 'border-white/10');
+            });
+            event.target.classList.add('active', 'bg-pink-500/20', 'text-pink-400', 'border-pink-500/50');
+            event.target.classList.remove('bg-black/40', 'text-gray-400', 'border-white/10');
+            
+            document.getElementById('relation-graph-view').classList.toggle('hidden', tab !== 'graph');
+            document.getElementById('relation-matrix-view').classList.toggle('hidden', tab !== 'matrix');
+        }
+
+        function updateRelation() {
+            const input = document.getElementById('relation-input').value;
+            const pairs = input.split(';').map(p => p.trim().split(',').map(s => s.trim())).filter(p => p.length === 2);
+            
+            const domain = [...new Set(pairs.map(p => p[0]))];
+            const range = [...new Set(pairs.map(p => p[1]))];
+            
+            document.getElementById('relation-domain').textContent = '{' + domain.join(', ') + '}';
+            document.getElementById('relation-range').textContent = '{' + range.join(', ') + '}';
+            
+            const svg = document.getElementById('relation-svg');
+            svg.innerHTML = '';
+            
+            const domainX = 80;
+            const rangeX = 320;
+            const spacing = 60;
+            const startY = 50;
+            
+            domain.forEach((d, i) => {
+                const y = startY + i * spacing;
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', domainX);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', 20);
+                circle.setAttribute('fill', 'rgba(236, 72, 153, 0.2)');
+                circle.setAttribute('stroke', '#ec4899');
+                circle.setAttribute('stroke-width', '2');
+                svg.appendChild(circle);
+                
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', domainX);
+                text.setAttribute('y', y + 5);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', '#ec4899');
+                text.textContent = d;
+                svg.appendChild(text);
+            });
+            
+            range.forEach((r, i) => {
+                const y = startY + i * spacing;
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', rangeX);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', 20);
+                circle.setAttribute('fill', 'rgba(6, 182, 212, 0.2)');
+                circle.setAttribute('stroke', '#06b6d4');
+                circle.setAttribute('stroke-width', '2');
+                svg.appendChild(circle);
+                
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', rangeX);
+                text.setAttribute('y', y + 5);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', '#06b6d4');
+                text.textContent = r;
+                svg.appendChild(text);
+            });
+            
+            pairs.forEach(([a, b]) => {
+                const aIndex = domain.indexOf(a);
+                const bIndex = range.indexOf(b);
+                if (aIndex === -1 || bIndex === -1) return;
+                
+                const y1 = startY + aIndex * spacing;
+                const y2 = startY + bIndex * spacing;
+                
+                const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                arrow.setAttribute('d', `M ${domainX + 20} ${y1} L ${rangeX - 20} ${y2}`);
+                arrow.setAttribute('stroke', 'rgba(255, 255, 255, 0.5)');
+                arrow.setAttribute('stroke-width', '2');
+                arrow.setAttribute('marker-end', 'url(#arrowhead)');
+                arrow.classList.add('relation-edge');
+                svg.appendChild(arrow);
+            });
+            
+            const matrix = document.getElementById('relation-matrix');
+            matrix.innerHTML = '';
+            
+            const headerRow = document.createElement('tr');
+            headerRow.appendChild(document.createElement('th'));
+            range.forEach(r => {
+                const th = document.createElement('th');
+                th.className = 'p-2 text-cyan-400';
+                th.textContent = r;
+                headerRow.appendChild(th);
+            });
+            matrix.appendChild(headerRow);
+            
+            domain.forEach(d => {
+                const row = document.createElement('tr');
+                const th = document.createElement('th');
+                th.className = 'p-2 text-pink-400';
+                th.textContent = d;
+                row.appendChild(th);
+                
+                range.forEach(r => {
+                    const td = document.createElement('td');
+                    td.className = 'p-2';
+                    const hasRelation = pairs.some(([a, b]) => a === d && b === r);
+                    td.innerHTML = hasRelation ? '<span class="text-green-400">1</span>' : '<span class="text-gray-600">0</span>';
+                    row.appendChild(td);
+                });
+                matrix.appendChild(row);
+            });
+        }
+
+        // 4. Partial Ordering
+        function changePoset() {
+            const type = document.getElementById('poset-select').value;
+            const svg = document.getElementById('hasse-svg');
+            svg.innerHTML = '';
+            
+            let nodes = [];
+            let edges = [];
+            
+            if (type === 'divisors') {
+                nodes = [
+                    {id: '1', x: 200, y: 250},
+                    {id: '2', x: 150, y: 180},
+                    {id: '3', x: 250, y: 180},
+                    {id: '4', x: 120, y: 110},
+                    {id: '6', x: 200, y: 110},
+                    {id: '12', x: 200, y: 40}
+                ];
+                edges = [['1','2'], ['1','3'], ['2','4'], ['2','6'], ['3','6'], ['4','12'], ['6','12']];
+                document.getElementById('maximal-elements').textContent = '12';
+                document.getElementById('minimal-elements').textContent = '1';
+            } else if (type === 'powerset') {
+                nodes = [
+                    {id: '∅', x: 200, y: 250},
+                    {id: '{a}', x: 150, y: 180},
+                    {id: '{b}', x: 250, y: 180},
+                    {id: '{a,b}', x: 200, y: 110}
+                ];
+                edges = [['∅','{a}'], ['∅','{b}'], ['{a}','{a,b}'], ['{b}','{a,b}']];
+                document.getElementById('maximal-elements').textContent = '{a,b}';
+                document.getElementById('minimal-elements').textContent = '∅';
+            }
+            
+            edges.forEach(([from, to]) => {
+                const fromNode = nodes.find(n => n.id === from);
+                const toNode = nodes.find(n => n.id === to);
+                
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', fromNode.x);
+                line.setAttribute('y1', fromNode.y);
+                line.setAttribute('x2', toNode.x);
+                line.setAttribute('y2', toNode.y);
+                line.classList.add('hasse-line');
+                svg.appendChild(line);
+            });
+            
+            nodes.forEach(node => {
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.classList.add('hasse-node-group');
+                
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', node.x);
+                circle.setAttribute('cy', node.y);
+                circle.setAttribute('r', 25);
+                circle.classList.add('hasse-node');
+                
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', node.x);
+                text.setAttribute('y', node.y + 5);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', 'white');
+                text.setAttribute('font-size', '12');
+                text.textContent = node.id;
+                
+                g.appendChild(circle);
+                g.appendChild(text);
+                svg.appendChild(g);
+            });
+        }
+
+        // 5. Equivalence
+        function updateEquivalence(n) {
+            document.getElementById('mod-display').textContent = n;
+            const container = document.getElementById('equivalence-visual');
+            container.innerHTML = '';
+            
+            const classes = {};
+            for (let i = 0; i < 15; i++) {
+                const remainder = i % n;
+                if (!classes[remainder]) classes[remainder] = [];
+                classes[remainder].push(i);
+            }
+            
+            const colors = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6'];
+            
+            Object.entries(classes).forEach(([rem, nums]) => {
+                nums.forEach(num => {
+                    const el = document.createElement('div');
+                    el.className = 'w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white equivalence-class';
+                    el.style.backgroundColor = colors[rem % colors.length];
+                    el.textContent = num;
+                    container.appendChild(el);
+                });
+            });
+            
+            const classContainer = document.getElementById('equivalence-classes');
+            classContainer.innerHTML = '';
+            Object.entries(classes).forEach(([rem, nums]) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-2 text-sm';
+                div.innerHTML = `
+                    <span class="w-3 h-3 rounded-full" style="background-color: ${colors[rem % colors.length]}"></span>
+                    <span class="text-gray-400">[${rem}] =</span>
+                    <span class="mono text-green-400">{${nums.join(', ')}, ...}</span>
+                `;
+                classContainer.appendChild(div);
+            });
+        }
+
+        // 6. Image of Set
+        function updateImage() {
+            const funcType = document.getElementById('function-select').value;
+            const inputSet = document.getElementById('input-set').value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+            
+            let f;
+            switch(funcType) {
+                case 'square': f = x => x * x; break;
+                case 'double': f = x => 2 * x; break;
+                case 'mod': f = x => ((x % 3) + 3) % 3; break;
+                case 'abs': f = x => Math.abs(x); break;
+            }
+            
+            const image = [...new Set(inputSet.map(f))].sort((a,b) => a-b);
+            document.getElementById('direct-image').textContent = '{' + image.join(', ') + '}';
+            
+            const target = funcType === 'mod' ? [0, 1, 2] : [0, 1];
+            const inverse = inputSet.filter(x => target.includes(f(x)));
+            document.getElementById('inverse-image').textContent = '{' + inverse.join(', ') + '}';
+            
+            const domainGroup = document.getElementById('domain-elements');
+            const codomainGroup = document.getElementById('codomain-elements');
+            const arrowsGroup = document.getElementById('function-arrows');
+            
+            domainGroup.innerHTML = '';
+            codomainGroup.innerHTML = '';
+            arrowsGroup.innerHTML = '';
+            
+            inputSet.forEach((x, i) => {
+                const y = 60 + i * 40;
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', 50);
+                text.setAttribute('y', y);
+                text.setAttribute('fill', '#fb923c');
+                text.setAttribute('font-size', '14');
+                text.textContent = x;
+                domainGroup.appendChild(text);
+            });
+            
+            const allOutputs = [...new Set([...inputSet.map(f), ...target])].sort((a,b) => a-b);
+            allOutputs.forEach((y, i) => {
+                const yPos = 60 + i * 40;
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', 250);
+                text.setAttribute('y', yPos);
+                text.setAttribute('fill', target.includes(y) ? '#06b6d4' : '#666');
+                text.setAttribute('font-size', '14');
+                text.setAttribute('font-weight', target.includes(y) ? 'bold' : 'normal');
+                text.textContent = y;
+                codomainGroup.appendChild(text);
+            });
+            
+            inputSet.forEach((x, i) => {
+                const y1 = 60 + i * 40 - 5;
+                const output = f(x);
+                const j = allOutputs.indexOf(output);
+                const y2 = 60 + j * 40 - 5;
+                
+                const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                arrow.setAttribute('d', `M 70 ${y1} Q 160 ${y1} 230 ${y2}`);
+                arrow.setAttribute('stroke', target.includes(output) ? '#06b6d4' : 'rgba(251, 146, 60, 0.5)');
+                arrow.setAttribute('stroke-width', '2');
+                arrow.setAttribute('fill', 'none');
+                arrow.setAttribute('marker-end', 'url(#arrowhead-orange)');
+                arrowsGroup.appendChild(arrow);
+            });
+        }
+
+        // 7. Cardinality
+        function compareSets(set1, set2) {
+            const placeholder = document.getElementById('cardinality-placeholder');
+            const svg = document.getElementById('cardinality-svg');
+            const info = document.getElementById('cardinality-info');
+            const title = document.getElementById('cardinality-title');
+            const desc = document.getElementById('cardinality-desc');
+            
+            placeholder.classList.add('hidden');
+            svg.classList.remove('hidden');
+            info.classList.remove('hidden');
+            
+            svg.innerHTML = '';
+            
+            if (set1 === 'natural' && set2 === 'even') {
+                title.textContent = '|ℕ| = |2ℕ| (Countably Infinite)';
+                desc.textContent = 'The function f(n) = 2n is a bijection between ℕ and even numbers. They have the same cardinality ℵ₀ despite 2ℕ ⊂ ℕ.';
+                
+                for (let i = 0; i < 6; i++) {
+                    const left = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    left.setAttribute('x', 100);
+                    left.setAttribute('y', 50 + i * 40);
+                    left.setAttribute('fill', '#f87171');
+                    left.setAttribute('font-size', '16');
+                    left.textContent = i;
+                    svg.appendChild(left);
+                    
+                    const right = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    right.setAttribute('x', 300);
+                    right.setAttribute('y', 50 + i * 40);
+                    right.setAttribute('fill', '#60a5fa');
+                    right.setAttribute('font-size', '16');
+                    right.textContent = i * 2;
+                    svg.appendChild(right);
+                    
+                    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    arrow.setAttribute('d', `M 120 ${50 + i * 40 - 5} L 280 ${50 + i * 40 - 5}`);
+                    arrow.setAttribute('stroke', 'rgba(255,255,255,0.3)');
+                    arrow.setAttribute('stroke-width', '1');
+                    svg.appendChild(arrow);
+                }
+            } else if (set1 === 'natural' && set2 === 'real') {
+                title.textContent = '|ℕ| < |ℝ| (Uncountable)';
+                desc.textContent = 'Real numbers are uncountable. Cantor\'s diagonal argument proves no bijection exists between ℕ and ℝ. |ℝ| = 2^ℵ₀ = 𝔠.';
+                
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', 200);
+                text.setAttribute('y', 150);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', '#f87171');
+                text.setAttribute('font-size', '18');
+                text.textContent = 'ℝ is uncountable';
+                svg.appendChild(text);
+                
+                const subtext = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                subtext.setAttribute('x', 200);
+                subtext.setAttribute('y', 180);
+                subtext.setAttribute('text-anchor', 'middle');
+                subtext.setAttribute('fill', '#9ca3af');
+                subtext.setAttribute('font-size', '14');
+                subtext.textContent = 'No complete list possible';
+                svg.appendChild(subtext);
+            }
+        }
+
+        // 8. Hilbert's Hotel
+        function initHotel() {
+            const container = document.getElementById('hotel-visual');
+            container.innerHTML = '';
+            for (let i = 1; i <= 8; i++) {
+                const room = document.createElement('div');
+                room.className = 'w-12 bg-indigo-500/30 border border-indigo-500/50 rounded-t flex items-end justify-center text-indigo-400 font-bold pb-2 transition-all duration-500';
+                room.style.height = '40px';
+                room.id = `room-${i}`;
+                room.textContent = i;
+                container.appendChild(room);
+            }
+        }
+
+        function hotelShift(type) {
+            if (type === 'right') {
+                for (let i = 8; i >= 1; i--) {
+                    const room = document.getElementById(`room-${i}`);
+                    if (i === 1) {
+                        room.style.height = '0px';
+                        room.style.opacity = '0';
+                        setTimeout(() => {
+                            room.style.height = '40px';
+                            room.style.opacity = '1';
+                            room.textContent = 'G';
+                        }, 500);
+                    } else {
+                        const prev = document.getElementById(`room-${i-1}`);
+                        room.textContent = prev.textContent;
+                    }
+                }
+            } else if (type === 'double') {
+                for (let i = 1; i <= 8; i++) {
+                    const room = document.getElementById(`room-${i}`);
+                    room.textContent = i * 2;
+                }
+            }
+        }
+
+        // 9. Function Types
+        function showFunctionType(type) {
+            document.querySelectorAll('.function-type-card').forEach(c => c.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            const display = document.getElementById('function-type-display');
+            const desc = document.getElementById('function-type-desc');
+            const svg = document.getElementById('function-type-svg');
+            
+            svg.innerHTML = '';
+            
+            // Draw sets
+            const domainX = 80, codomainX = 320, startY = 60, spacing = 50;
+            
+            // Domain elements
+            ['a', 'b', 'c'].forEach((el, i) => {
+                const y = startY + i * spacing;
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', domainX);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', 20);
+                circle.setAttribute('fill', 'rgba(0, 243, 255, 0.2)');
+                circle.setAttribute('stroke', '#00f3ff');
+                svg.appendChild(circle);
+                
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', domainX);
+                text.setAttribute('y', y + 5);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', '#00f3ff');
+                text.textContent = el;
+                svg.appendChild(text);
+            });
+            
+            // Codomain elements based on type
+            let codomainElements, arrows;
+            if (type === 'injective') {
+                display.textContent = 'Injective (One-to-One)';
+                desc.textContent = 'Each output has at most one input';
+                codomainElements = ['1', '2', '3', '4'];
+                arrows = [['a', 0, '1', 0], ['b', 1, '2', 1], ['c', 2, '3', 2]];
+            } else if (type === 'surjective') {
+                display.textContent = 'Surjective (Onto)';
+                desc.textContent = 'Every output is covered';
+                codomainElements = ['1', '2'];
+                arrows = [['a', 0, '1', 0], ['b', 1, '2', 0], ['c', 2, '1', 0]];
+            } else if (type === 'bijective') {
+                display.textContent = 'Bijective';
+                desc.textContent = 'Perfect one-to-one correspondence';
+                codomainElements = ['1', '2', '3'];
+                arrows = [['a', 0, '1', 0], ['b', 1, '2', 1], ['c', 2, '3', 2]];
+            }
+            
+            // Draw codomain
+            codomainElements.forEach((el, i) => {
+                const y = startY + i * spacing;
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', codomainX);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', 20);
+                circle.setAttribute('fill', 'rgba(188, 19, 254, 0.2)');
+                circle.setAttribute('stroke', '#bc13fe');
+                svg.appendChild(circle);
+                
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', codomainX);
+                text.setAttribute('y', y + 5);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', '#bc13fe');
+                text.textContent = el;
+                svg.appendChild(text);
+            });
+            
+            // Draw arrows
+            arrows.forEach(([from, fromIdx, to, toIdx]) => {
+                const y1 = startY + fromIdx * spacing;
+                const y2 = startY + toIdx * spacing;
+                
+                const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                arrow.setAttribute('d', `M ${domainX + 20} ${y1} L ${codomainX - 20} ${y2}`);
+                arrow.setAttribute('stroke', '#00ff9d');
+                arrow.setAttribute('stroke-width', '2');
+                arrow.setAttribute('marker-end', 'url(#arrowhead)');
+                arrow.classList.add('bijection-line');
+                svg.appendChild(arrow);
+            });
+        }
+
+        // 10. Function Operations
+        function updateFunctionOperations() {
+            const f = document.getElementById('func-f-select').value;
+            const g = document.getElementById('func-g-select').value;
+            
+            const fMap = {
+                'x': 'x',
+                'x2': 'x²',
+                'sin': 'sin(x)',
+                'exp': 'eˣ'
+            };
+            
+            const gMap = {
+                '2': '2',
+                'x': 'x',
+                'cos': 'cos(x)',
+                'ln': 'ln(x+1)'
+            };
+            
+            const fName = fMap[f];
+            const gName = gMap[g];
+            
+            document.getElementById('sum-formula').textContent = `${fName} + ${gName}`;
+            document.getElementById('product-formula').textContent = `${fName} · ${gName}`;
+            
+            // Plotly chart
+            const xValues = [];
+            const fValues = [];
+            const gValues = [];
+            const sumValues = [];
+            const prodValues = [];
+            
+            for (let x = -5; x <= 5; x += 0.1) {
+                xValues.push(x);
+                let fx, gx;
+                
+                switch(f) {
+                    case 'x': fx = x; break;
+                    case 'x2': fx = x*x; break;
+                    case 'sin': fx = Math.sin(x); break;
+                    case 'exp': fx = Math.exp(x); break;
+                }
+                
+                switch(g) {
+                    case '2': gx = 2; break;
+                    case 'x': gx = x; break;
+                    case 'cos': gx = Math.cos(x); break;
+                    case 'ln': gx = Math.log(x + 1); break;
+                }
+                
+                fValues.push(fx);
+                gValues.push(gx);
+                sumValues.push(fx + gx);
+                prodValues.push(fx * gx);
+            }
+            
+            const traces = [
+                {x: xValues, y: fValues, name: 'f(x)', line: {color: '#a855f7'}},
+                {x: xValues, y: gValues, name: 'g(x)', line: {color: '#06b6d4'}},
+                {x: xValues, y: sumValues, name: 'f+g', line: {color: '#fbbf24', dash: 'dash'}},
+                {x: xValues, y: prodValues, name: 'f·g', line: {color: '#f472b6', dash: 'dot'}}
+            ];
+            
+            Plotly.newPlot('function-plot-container', traces, {
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0.3)',
+                font: {color: '#9ca3af'},
+                xaxis: {gridcolor: 'rgba(255,255,255,0.1)', zerolinecolor: 'rgba(255,255,255,0.2)'},
+                yaxis: {gridcolor: 'rgba(255,255,255,0.1)', zerolinecolor: 'rgba(255,255,255,0.2)'},
+                margin: {t: 20, r: 20, b: 40, l: 40},
+                legend: {bgcolor: 'rgba(0,0,0,0.5)'}
+            }, {responsive: true});
+        }
+
+        // 11. Bijection
+        function updateBijection() {
+            const type = document.getElementById('bijection-select').value;
+            const svg = document.getElementById('bijection-svg');
+            svg.innerHTML = '';
+            
+            const domainX = 100, codomainX = 300, startY = 50, spacing = 60;
+            let domain, codomain, arrows, formula;
+            
+            if (type === 'shift') {
+                domain = [0, 1, 2, 3, 4];
+                codomain = [1, 2, 3, 4, 5];
+                arrows = [[0,0], [1,1], [2,2], [3,3], [4,4]];
+                formula = 'f(x) = x + 1';
+                document.getElementById('bijection-cardinality').textContent = '|ℤ| = |ℤ|';
+            } else if (type === 'square') {
+                domain = [0, 1, 2, 3];
+                codomain = [0, 1, 4, 9];
+                arrows = [[0,0], [1,1], [2,2], [3,3]];
+                formula = 'f(x) = x²';
+                document.getElementById('bijection-cardinality').textContent = '|ℝ⁺| = |ℝ⁺|';
+            }
+            
+            // Draw
+            domain.forEach((d, i) => {
+                const y = startY + i * spacing;
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', domainX);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', 20);
+                circle.setAttribute('fill', 'rgba(0, 243, 255, 0.2)');
+                circle.setAttribute('stroke', '#00f3ff');
+                svg.appendChild(circle);
+                
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', domainX);
+                text.setAttribute('y', y + 5);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', '#00f3ff');
+                text.textContent = d;
+                svg.appendChild(text);
+            });
+            
+            codomain.forEach((c, i) => {
+                const y = startY + i * spacing;
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', codomainX);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', 20);
+                circle.setAttribute('fill', 'rgba(0, 255, 157, 0.2)');
+                circle.setAttribute('stroke', '#00ff9d');
+                svg.appendChild(circle);
+                
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', codomainX);
+                text.setAttribute('y', y + 5);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', '#00ff9d');
+                text.textContent = c;
+                svg.appendChild(text);
+            });
+            
+            arrows.forEach(([d, c]) => {
+                const y1 = startY + d * spacing;
+                const y2 = startY + c * spacing;
+                
+                const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                arrow.setAttribute('d', `M ${domainX + 20} ${y1} L ${codomainX - 20} ${y2}`);
+                arrow.setAttribute('stroke', '#00ff9d');
+                arrow.setAttribute('stroke-width', '2');
+                arrow.setAttribute('marker-end', 'url(#arrowhead)');
+                arrow.classList.add('bijection-line');
+                svg.appendChild(arrow);
+            });
+            
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.setAttribute('x', 200);
+            label.setAttribute('y', 350);
+            label.setAttribute('text-anchor', 'middle');
+            label.setAttribute('fill', '#00ff9d');
+            label.setAttribute('font-size', '16');
+            label.textContent = formula;
+            svg.appendChild(label);
+        }
+
+        // 12. Inverse Function
+        function updateInverse() {
+            const type = document.getElementById('inverse-f-select').value;
+            const result = document.getElementById('inverse-result');
+            const warning = document.getElementById('inverse-warning');
+            const svg = document.getElementById('inverse-svg');
+            
+            svg.innerHTML = '';
+            
+            let f, inv, isBijective, points;
+            
+            if (type === '2x') {
+                f = x => 2 * x;
+                inv = x => x / 2;
+                isBijective = true;
+                points = [[-2, -4], [-1, -2], [0, 0], [1, 2], [2, 4]];
+                result.textContent = 'f⁻¹(x) = x/2';
+            } else if (type === 'x3') {
+                f = x => x * x * x;
+                inv = x => Math.cbrt(x);
+                isBijective = true;
+                points = [[-2, -8], [-1, -1], [0, 0], [1, 1], [2, 8]];
+                result.textContent = 'f⁻¹(x) = ∛x';
+            } else if (type === 'x2') {
+                f = x => x * x;
+                isBijective = false;
+                points = [[-2, 4], [-1, 1], [0, 0], [1, 1], [2, 4]];
+                result.textContent = 'Not a function (fails horizontal line test)';
+            } else if (type === 'exp') {
+                f = x => Math.exp(x);
+                inv = x => Math.log(x);
+                isBijective = true;
+                points = [[-2, 0.14], [-1, 0.37], [0, 1], [1, 2.72], [2, 7.39]];
+                result.textContent = 'f⁻¹(x) = ln(x)';
+            }
+            
+            warning.classList.toggle('hidden', isBijective);
+            
+            // Draw graph
+            const width = svg.clientWidth || 400;
+            const height = svg.clientHeight || 320;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const scale = 30;
+            
+            // Axes
+            const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            xAxis.setAttribute('x1', 0);
+            xAxis.setAttribute('y1', centerY);
+            xAxis.setAttribute('x2', width);
+            xAxis.setAttribute('y2', centerY);
+            xAxis.setAttribute('stroke', 'rgba(255,255,255,0.2)');
+            svg.appendChild(xAxis);
+            
+            const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            yAxis.setAttribute('x1', centerX);
+            yAxis.setAttribute('y1', 0);
+            yAxis.setAttribute('x2', centerX);
+            yAxis.setAttribute('y2', height);
+            yAxis.setAttribute('stroke', 'rgba(255,255,255,0.2)');
+            svg.appendChild(yAxis);
+            
+            // Function curve
+            let path = 'M ';
+            for (let x = -5; x <= 5; x += 0.1) {
+                const y = f(x);
+                const px = centerX + x * scale;
+                const py = centerY - y * scale;
+                if (x === -5) path += `${px} ${py}`;
+                else path += ` L ${px} ${py}`;
+            }
+            
+            const curve = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            curve.setAttribute('d', path);
+            curve.setAttribute('fill', 'none');
+            curve.setAttribute('stroke', '#ec4899');
+            curve.setAttribute('stroke-width', '2');
+            curve.classList.add('function-curve');
+            svg.appendChild(curve);
+            
+            // Inverse (if exists)
+            if (isBijective) {
+                let invPath = 'M ';
+                for (let x = -5; x <= 5; x += 0.1) {
+                    const y = inv(x);
+                    const px = centerX + x * scale;
+                    const py = centerY - y * scale;
+                    if (x === -5) invPath += `${px} ${py}`;
+                    else invPath += ` L ${px} ${py}`;
+                }
+                
+                const invCurve = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                invCurve.setAttribute('d', invPath);
+                invCurve.setAttribute('fill', 'none');
+                invCurve.setAttribute('stroke', '#06b6d4');
+                invCurve.setAttribute('stroke-width', '2');
+                invCurve.setAttribute('stroke-dasharray', '5,5');
+                svg.appendChild(invCurve);
+                
+                // y=x line
+                const diagonal = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                diagonal.setAttribute('x1', 0);
+                diagonal.setAttribute('y1', height);
+                diagonal.setAttribute('x2', width);
+                diagonal.setAttribute('y2', 0);
+                diagonal.setAttribute('stroke', 'rgba(255,255,255,0.1)');
+                diagonal.setAttribute('stroke-dasharray', '3,3');
+                svg.appendChild(diagonal);
+            }
+            
+            // Points
+            points.forEach(([x, y]) => {
+                const px = centerX + x * scale;
+                const py = centerY - y * scale;
+                
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', px);
+                circle.setAttribute('cy', py);
+                circle.setAttribute('r', 4);
+                circle.setAttribute('fill', '#ec4899');
+                svg.appendChild(circle);
+            });
+        }
+
+        // 13. Composite Function
+        function updateComposite() {
+            const gType = document.getElementById('comp-g-select').value;
+            const fType = document.getElementById('comp-f-select').value;
+            
+            let g, f, formula;
+            
+            switch(gType) {
+                case 'x2': g = x => x + 2; break;
+                case '2x': g = x => 2 * x; break;
+            }
+            
+            switch(fType) {
+                case '3x': f = x => 3 * x; break;
+                case 'x1': f = x => x - 1; break;
+            }
+            
+            if (gType === 'x2' && fType === '3x') formula = '3(x + 2) = 3x + 6';
+            else if (gType === 'x2' && fType === 'x1') formula = '(x + 2) - 1 = x + 1';
+            else if (gType === '2x' && fType === '3x') formula = '3(2x) = 6x';
+            else formula = '2x - 1';
+            
+            document.getElementById('composite-formula').textContent = formula;
+            updateCompositeValue(2);
+        }
+
+        function updateCompositeValue(val) {
+            const x = parseFloat(val);
+            const gType = document.getElementById('comp-g-select').value;
+            const fType = document.getElementById('comp-f-select').value;
+            
+            let g, f;
+            switch(gType) {
+                case 'x2': g = x => x + 2; break;
+                case '2x': g = x => 2 * x; break;
+            }
+            switch(fType) {
+                case '3x': f = x => 3 * x; break;
+                case 'x1': f = x => x - 1; break;
+            }
+            
+            const gx = g(x);
+            const fx = f(gx);
+            
+            document.getElementById('comp-input').textContent = x;
+            document.getElementById('comp-middle').textContent = gx;
+            document.getElementById('comp-output').textContent = fx;
+            
+            const steps = document.getElementById('composite-steps');
+            steps.innerHTML = `
+                <div class="composite-step" style="animation-delay: 0s">1. Start with x = ${x}</div>
+                <div class="composite-step" style="animation-delay: 0.2s">2. Apply g: g(${x}) = ${gx}</div>
+                <div class="composite-step" style="animation-delay: 0.4s">3. Apply f: f(${gx}) = ${fx}</div>
+            `;
+        }
+
+        // 14. Countable Sets
+        function showCountable(type) {
+            const title = document.getElementById('countable-title');
+            const visual = document.getElementById('countable-visual');
+            const sequence = document.getElementById('countable-sequence');
+            
+            visual.innerHTML = '';
+            
+            if (type === 'integers') {
+                title.textContent = 'Integers ℤ';
+                sequence.textContent = '0, 1, -1, 2, -2, 3, -3, ...';
+                const ints = [0, 1, -1, 2, -2, 3, -3, 4, -4, 5, -5];
+                ints.forEach((n, i) => {
+                    const el = document.createElement('div');
+                    el.className = 'w-12 h-12 rounded-lg bg-orange-500/20 border border-orange-500/50 flex items-center justify-center text-orange-400 font-bold';
+                    el.textContent = n;
+                    el.style.animationDelay = `${i * 0.05}s`;
+                    visual.appendChild(el);
+                });
+            } else if (type === 'rationals') {
+                title.textContent = 'Rational Numbers ℚ';
+                sequence.textContent = '0/1, 1/1, -1/1, 1/2, -1/2, 2/1, -2/1, ...';
+                const rats = ['0', '1', '-1', '1/2', '-1/2', '2', '-2', '1/3', '2/3'];
+                rats.forEach((r, i) => {
+                    const el = document.createElement('div');
+                    el.className = 'w-14 h-12 rounded-lg bg-orange-500/20 border border-orange-500/50 flex items-center justify-center text-orange-400 text-sm';
+                    el.textContent = r;
+                    el.style.animationDelay = `${i * 0.05}s`;
+                    visual.appendChild(el);
+                });
+            }
+        }
+
+        // 15. Cantor's Diagonal
+        function generateNewDiagonal() {
+            const tbody = document.getElementById('diagonal-body');
+            tbody.innerHTML = '';
+            
+            const numbers = [];
+            for (let i = 0; i < 5; i++) {
+                let num = '0.';
+                for (let j = 0; j < 6; j++) {
+                    num += Math.floor(Math.random() * 10);
+                }
+                numbers.push(num);
+            }
+            
+            let diagonalDigits = '';
+            
+            numbers.forEach((num, i) => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-white/10';
+                
+                const indexCell = document.createElement('td');
+                indexCell.className = 'p-2 text-gray-400';
+                indexCell.textContent = `r${i+1}`;
+                row.appendChild(indexCell);
+                
+                const numCell = document.createElement('td');
+                numCell.className = 'p-2 mono text-cyan-400';
+                
+                const digits = num.substring(2).split('');
+                digits.forEach((d, j) => {
+                    const span = document.createElement('span');
+                    span.textContent = d;
+                    if (i === j) {
+                        span.className = 'diagonal-cell highlight text-white font-bold';
+                        diagonalDigits += d;
+                    }
+                    numCell.appendChild(span);
+                });
+                row.appendChild(numCell);
+                
+                const diagCell = document.createElement('td');
+                diagCell.className = 'p-2';
+                const diagDigit = document.createElement('span');
+                diagDigit.className = 'text-pink-400 font-bold';
+                diagDigit.textContent = digits[i];
+                diagCell.appendChild(diagDigit);
+                row.appendChild(diagCell);
+                
+                tbody.appendChild(row);
+            });
+            
+            // Generate new number (add 1 mod 10 to each diagonal digit)
+            const newDigits = diagonalDigits.split('').map(d => (parseInt(d) + 1) % 10).join('');
+            document.getElementById('diagonal-result').textContent = '0.' + newDigits;
+        }
+
+        // 16. Power Set
+        function updatePowerSet() {
+            const size = parseInt(document.getElementById('power-set-base').value);
+            const display = document.getElementById('power-set-display');
+            const viz = document.getElementById('power-set-viz');
+            const sizeDisplay = document.getElementById('power-set-size');
+            
+            let baseSet;
+            if (size === 3) baseSet = ['a', 'b', 'c'];
+            else if (size === 2) baseSet = ['1', '2'];
+            else baseSet = ['1', '2', '3', '4'];
+            
+            // Generate power set
+            const powerSet = [[]];
+            baseSet.forEach(el => {
+                const newSubsets = powerSet.map(subset => [...subset, el]);
+                powerSet.push(...newSubsets);
+            });
+            
+            display.innerHTML = '';
+            powerSet.forEach((subset, i) => {
+                const div = document.createElement('div');
+                div.className = 'text-cyan-400 mono';
+                div.textContent = `{${subset.join(', ')}}`;
+                display.appendChild(div);
+            });
+            
+            sizeDisplay.textContent = powerSet.length;
+            
+            // Visual
+            viz.innerHTML = '';
+            powerSet.forEach((subset, i) => {
+                const el = document.createElement('div');
+                el.className = 'power-set-node w-16 h-16 rounded-full bg-cyan-500/20 border border-cyan-500/50 flex items-center justify-center text-xs text-cyan-400';
+                el.textContent = subset.length;
+                el.title = `{${subset.join(', ')}}`;
+                viz.appendChild(el);
+            });
+        }
+    </script>
+</body>
+</html>
